@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do App</title>
+    <link rel="icon" href="todo_icon.jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    
+    <section id="myBody">
+        <!-- printing status of todo -->
+        <h3 id="status"></h3> 
+        <hr>
+
+        <h1 style="text-align: center;">To Do App</h1>
+    
+        <form action="" class="add-todo">
+            <input type="text" name="todo" id="todo" placeholder="Add todo">
+            <button type="submit" class="btn" style="display: block;">Add</button>
+        </form>
+
+        <!-- Display error if exist -->
+        <span id="error"></span>
+
+        <!-- Display no todo message if no todo -->
+        <h3 class="no-todo">No todo</h3>
+
+        <!-- Display list of Todo -->
+        <div class="todos"></div>
+    </section>
+
+    <script>
+        let totalTodo = 0;
+        let doneTodo = 0;
+        let unDoneTodo = 0;
+
+        const status = document.querySelector('#status'); // status
+        const form = document.querySelector('.add-todo'); // form
+        const list = document.querySelector('.todos'); // list - for adding todo
+        const inputField = document.querySelector('#todo'); // input field
+        const noToDo = document.querySelector('.no-todo'); // no todo message
+
+        // update status every time when todo is added, deleted or marked as done or undone
+        const updateStatus = () => {
+            status.innerHTML = `Total todo: ${totalTodo} | Done: ${doneTodo} | Undone: ${unDoneTodo}`;
+        }
+        updateStatus();
+
+        inputField.addEventListener('input', (e) => { // e is an event object
+            // console.log(e);
+            if(e.target.value.length > 0) {
+                document.querySelector('#error').innerText = "";
+            }
+        });
+
+        // Add todo on form submit.
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // for not to reload page
+
+            const todo = form.todo.value.trim();
+            console.log("todo: ",todo);
+
+            if(todo.length == 0) {
+                document.querySelector('#error').innerText = "Please enter a todo";
+                document.querySelector('#error').style.color = "red";
+                return;
+
+            } else if(todo.length > 0 && todo.length < 3) {
+                document.querySelector('#error').innerText = "Please enter at least 3 characters";
+                document.querySelector('#error').style.color = "blue";
+                return;
+            }
+
+            // Add todo in list
+            if(todo.length) {
+                addTodo(todo);
+                form.reset(); 
+            }
+
+        });
+
+        // Add new todo in list.
+        const addTodo = (todo) => {
+            totalTodo = totalTodo + 1; // increment total todo
+            unDoneTodo = unDoneTodo + 1; // increment undone todo
+
+            const markup = `
+                <div class="item"> 
+                    <h3 class="todo-name">${todo}</h3>
+                    <div class="btns">
+                        <button class="mark-done btn" onclick="mark(this)" >Mark as done</button>
+                        <button class="delete btn delete" onclick="deleteTodo(this)">Delete</button>
+                    </div>
+                </div>
+            `;
+
+            console.log("list.children.length: ",list.children.length)
+            
+            if(list.children.length == 0) {
+                list.innerHTML = "";
+                // hide no todo message
+                noToDo.style.display = "none";
+            }
+            list.innerHTML += markup;
+
+            updateStatus();
+        }
+
+        // Mark todo as done.
+        const mark = (e) => {
+            const div = e.parentNode.parentNode;
+            div.classList.toggle('done'); // add or remove done class
+            
+            // make button inner text to unmark
+            if(div.classList.contains('done')) {
+                doneTodo = doneTodo + 1; // increment done todo
+                unDoneTodo = unDoneTodo - 1; // decrement undone todo
+
+                e.innerText = "Unmark";
+                div.querySelector('.todo-name').style.textDecoration = "underline";
+                // div.style.backgroundColor = "green";
+            } else {
+                doneTodo = doneTodo - 1; // decrement done todo
+                unDoneTodo = unDoneTodo + 1; // increment undone todo
+
+                e.innerText = "Mark as done";
+                div.querySelector('.todo-name').style.textDecoration = "none";
+            }
+            updateStatus();
+        }
+
+        // Delete todo from list.
+        const deleteTodo = (e) => {
+            totalTodo = totalTodo - 1; // decrement total todo
+            // check todo is done or not
+            if(e.parentNode.parentNode.classList.contains('done')) {
+                doneTodo = doneTodo - 1; // decrement done todo
+            } else {
+                unDoneTodo = unDoneTodo - 1; // decrement undone todo
+            }
+
+            const div = e.parentNode.parentNode;
+            div.remove();
+
+            if(list.children.length == 0) {
+                // show no todo message
+                noToDo.style.display = "block";
+            }
+            updateStatus();
+        }
+
+    </script>
+</body>
+</html>
