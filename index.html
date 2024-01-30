@@ -113,8 +113,14 @@
 
         // Mark todo as done.
         const mark = (e) => {
-            const div = e.parentNode.parentNode;
-            div.classList.toggle('done'); // add or remove done class
+            // parentNode ---> retun parent Node like textNode,elments.
+            // parentElement ---> return parent HTML element. return null if parent HTML element is not exists.
+
+            // const div = e.parentNode.parentNode;
+            const div = e.parentElement.parentElement;
+
+            // add or remove done class
+            div.classList.toggle('done'); // if class not exists then add // if class exists then remove it.
             
             // make button inner text to unmark
             if(div.classList.contains('done')) {
@@ -139,20 +145,21 @@
         const deleteTodo = (e) => {
             totalTodo = totalTodo - 1; // decrement total todo
             // check todo is done or not
-            if(e.parentNode.parentNode.classList.contains('done')) {
+            if(e.parentElement.parentElement.classList.contains('done')) {
                 doneTodo = doneTodo - 1; // decrement done todo
             } else {
                 unDoneTodo = unDoneTodo - 1; // decrement undone todo
             }
 
-            const div = e.parentNode.parentNode;
+            // const div = e.parentNode.parentNode; // this can be return text Node, html element.
+            const div = e.parentElement.parentElement; // we need html element.
             div.remove();
 
             if(list.children.length == 0) {
                 // show no todo message
                 noToDo.style.display = "block";
             }
-            
+
             updateStatus();
         }
 
