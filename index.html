@@ -52,7 +52,7 @@
 
         inputField.addEventListener('input', (e) => { // e is an event object
             // console.log(e);
-            if(e.target.value.length > 0) {
+            if(e.target.value.length > 0) { // target="#todo"
                 document.querySelector('#error').innerText = "";
             }
         });
@@ -61,15 +61,16 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault(); // for not to reload page
 
-            const todo = form.todo.value.trim();
+            const todo = form.todo.value.trim(); // chaining. // remove white from start and end.
             console.log("todo: ",todo);
 
+            // empty input field & press Add button (OR hit enter).
             if(todo.length == 0) {
                 document.querySelector('#error').innerText = "Please enter a todo";
                 document.querySelector('#error').style.color = "red";
                 return;
 
-            } else if(todo.length > 0 && todo.length < 3) {
+            } else if(todo.length > 0 && todo.length < 3) { // character is very less. 
                 document.querySelector('#error').innerText = "Please enter at least 3 characters";
                 document.querySelector('#error').style.color = "blue";
                 return;
@@ -130,6 +131,7 @@
                 e.innerText = "Mark as done";
                 div.querySelector('.todo-name').style.textDecoration = "none";
             }
+
             updateStatus();
         }
 
@@ -150,6 +152,7 @@
                 // show no todo message
                 noToDo.style.display = "block";
             }
+            
             updateStatus();
         }
 
