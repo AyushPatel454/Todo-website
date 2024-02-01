@@ -34,16 +34,16 @@
     </section>
 
     <script>
-        // onload event
+        // onload event - when web page is loaded
         window.addEventListener("load", function() {
             console.log("onload event");
             console.log("localStorage.length: ",localStorage.length);
             let length = localStorage.length;
             if(length > 0) {
                 for(let i = 0; i < length; i++) {
-                    let todoName = localStorage.getItem(i);
+                    let todoCode = localStorage.getItem(i);
 
-                    addTodoFromLocalStorage(todoName, i); // add todo (new function for add todo for display)
+                    addTodoFromLocalStorage(todoCode, i); // add todo (new function for add todo for display)
                 }
             }
         });
@@ -136,7 +136,7 @@
             totalTodo = totalTodo + 1; // increment total todo
             unDoneTodo = unDoneTodo + 1; // increment undone todo
 
-            const markup = localStorage.getItem(index);
+            const markup = todo;
             console.log(markup);
 
             console.log("list.children.length: ",list.children.length)
@@ -239,6 +239,7 @@
             updateStatus();
         }
 
+        // reset id of class for all div. (when todo is deleted)
         function reSetIdForAllTodo() {
             console.log("------- reSetIdForAllTodo() -------");
             let nodes = list.children;
