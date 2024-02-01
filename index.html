@@ -34,6 +34,20 @@
     </section>
 
     <script>
+        // onload event
+        window.addEventListener("load", function() {
+            console.log("onload event");
+            console.log("localStorage.length: ",localStorage.length);
+            let length = localStorage.length;
+            if(length > 0) {
+                for(let i = 0; i < length; i++) {
+                    let todoName = localStorage.getItem(i);
+
+                    addTodoFromLocalStorage(todoName, i); // add todo (new function for add todo for display)
+                }
+            }
+        });
+
         let totalTodo = 0;
         let doneTodo = 0;
         let unDoneTodo = 0;
@@ -89,8 +103,39 @@
             totalTodo = totalTodo + 1; // increment total todo
             unDoneTodo = unDoneTodo + 1; // increment undone todo
 
+            // add todo name in local Storage.
+            let length = localStorage.length;
+            localStorage.setItem(length, todo);
+
             const markup = `
-                <div class="item"> 
+                <div class="item ${length}"> 
+                    <h3 class="todo-name">${todo}</h3>
+                    <div class="btns">
+                        <button class="mark-done btn" onclick="mark(this)" >Mark as done</button>
+                        <button class="delete btn delete" onclick="deleteTodo(this)">Delete</button>
+                    </div>
+                </div>
+            `;
+
+            console.log("list.children.length: ",list.children.length)
+            
+            if(list.children.length == 0) {
+                list.innerHTML = "";
+                // hide no todo message
+                noToDo.style.display = "none";
+            }
+            list.innerHTML += markup;
+
+            updateStatus();
+        }
+
+        // Add todo from localStorage.
+        const addTodoFromLocalStorage = (todo, index) => {
+            totalTodo = totalTodo + 1; // increment total todo
+            unDoneTodo = unDoneTodo + 1; // increment undone todo
+
+            const markup = `
+                <div class="item ${index}"> 
                     <h3 class="todo-name">${todo}</h3>
                     <div class="btns">
                         <button class="mark-done btn" onclick="mark(this)" >Mark as done</button>
@@ -119,9 +164,12 @@
             // const div = e.parentNode.parentNode;
             const div = e.parentElement.parentElement;
             console.dir(e);
-
+            
             // add or remove done class
             div.classList.toggle('done'); // if class not exists then add // if class exists then remove it.
+            console.log(div);
+            // convert div to string
+            console.log(div.outerHTML);
             
             // make button inner text to unmark
             if(div.classList.contains('done')) {
@@ -154,7 +202,18 @@
 
             // const div = e.parentNode.parentNode; // this can be return text Node, html element.
             const div = e.parentElement.parentElement; // we need html element.
-            div.remove();
+
+            let temp = e.parentElement.parentElement.classList.length - 1;
+            let id = e.parentElement.parentElement.classList[temp];
+            console.log(id);
+            console.log("DELETE: id: ",id);
+
+            localStorage.removeItem(id);
+
+            div.remove(); // remove todo from list (not display)
+
+            // reset id of all todo & update localStorage
+            reSetIdForAllTodo();
 
             if(list.children.length == 0) {
                 // show no todo message
@@ -162,6 +221,28 @@
             }
 
             updateStatus();
+        }
+
+        function reSetIdForAllTodo() {
+            console.log("------- reSetIdForAllTodo() -------");
+            let nodes = list.children;
+            let traverse = 0;
+
+            for (const iterable of nodes) {
+                let temp = iterable.classList.length - 1; // find the length of classList array. (we need last index of classList array)
+                let id = iterable.classList[temp]; // get id of todo
+
+                let data = localStorage.getItem(id); // get todo name from localStorage
+                localStorage.removeItem(id); // remove todo from localStorage
+
+                iterable.classList.remove(id); // remove id from classList array
+
+                localStorage.setItem(traverse, data); // add todo in localStorage with new id
+                iterable.classList.add(traverse); // add new id in classList array
+                traverse++;
+            }
+
+
         }
 
     </script>
