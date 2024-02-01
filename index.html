@@ -52,7 +52,7 @@
 
         inputField.addEventListener('input', (e) => { // e is an event object
             // console.log(e);
-            if(e.target.value.length > 0) { // target="#todo"
+            if(e.target.value.trim().length > 0) { // target="#todo"
                 document.querySelector('#error').innerText = "";
             }
         });
