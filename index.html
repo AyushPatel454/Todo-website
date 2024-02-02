@@ -36,15 +36,15 @@
     <script>
         // onload event - when web page is loaded
         window.addEventListener("load", function() {
-            console.log("onload event");
-            console.log("localStorage.length: ",localStorage.length);
-            let length = localStorage.length;
-            if(length > 0) {
-                for(let i = 0; i < length; i++) {
-                    let todoCode = localStorage.getItem(i);
 
-                    addTodoFromLocalStorage(todoCode, i); // add todo (new function for add todo for display)
-                }
+            let data = localStorage.getItem("todos");
+            
+            if(data) {
+                let arr = JSON.parse(data);
+
+                arr.forEach((element) => {
+                    addTodoFromLocalStorage(element);
+                })
             }
         });
 
@@ -104,11 +104,30 @@
             unDoneTodo = unDoneTodo + 1; // increment undone todo
 
             // add todo name in local Storage.
-            let length = localStorage.length;
-            // localStorage.setItem(length, todo);
+            let data = localStorage.getItem("todos"); // get the previous todo id exists.
+            let arr; // store the / retrieve previous all todo & add new todo into this.
+            let obj; // store the information about todo.
+            let idOfdiv; // is array of length
+            let str; // use for convert back Array object in to string.
+
+            if(data) {
+                console.log("Data is exists....");
+                // convert array into JSON object
+                arr = JSON.parse(data); // array.
+                let len = arr.length; // find length of arr.
+                if(len > 0) {
+                    let lastId = arr[len - 1].id;
+                    idOfdiv = lastId + 1;
+                } else {
+                    idOfdiv = 0;
+                }
+            } else {
+                arr = [];
+                idOfdiv = 0; // because no data is exists.
+            }
 
             const markup = `
-                <div class="item ${length}"> 
+                <div class="item ${idOfdiv}"> 
                     <h3 class="todo-name">${todo}</h3>
                     <div class="btns">
                         <button class="mark-done btn" onclick="mark(this)" >Mark as done</button>
@@ -116,8 +135,19 @@
                     </div>
                 </div>
             `;
-            console.log(markup);
-            localStorage.setItem(length, markup);
+
+            obj = {
+                todoName: `${todo}`,
+                markup: markup,
+                isDone: false,
+                id: idOfdiv,
+            }
+
+            arr.push(obj);
+
+            str = JSON.stringify(arr);
+
+            localStorage.setItem("todos",str);
 
             console.log("list.children.length: ",list.children.length)
             
@@ -132,11 +162,15 @@
         }
 
         // Add todo from localStorage.
-        const addTodoFromLocalStorage = (todo, index) => {
+        const addTodoFromLocalStorage = (obj) => {
             totalTodo = totalTodo + 1; // increment total todo
-            unDoneTodo = unDoneTodo + 1; // increment undone todo
 
-            const markup = todo;
+            const markup = obj.markup;
+            if(obj.isDone) {
+                doneTodo = doneTodo + 1;
+            } else {
+                unDoneTodo = unDoneTodo + 1;
+            }
             console.log(markup);
 
             console.log("list.children.length: ",list.children.length)
@@ -148,32 +182,24 @@
             }
             list.innerHTML += markup;
 
-            // if it is done todo then update done todo
-            if(list.children[index].classList.contains('done')) {
-                doneTodo = doneTodo + 1; // increment done todo
-                unDoneTodo = unDoneTodo - 1; // decrement undone todo
-            }
-
             updateStatus();
         }
 
         // Mark todo as done.
         const mark = (e) => {
-            // parentNode ---> retun parent Node like textNode,elments.
-            // parentElement ---> return parent HTML element. return null if parent HTML element is not exists.
-
-            // const div = e.parentNode.parentNode;
             const div = e.parentElement.parentElement;
-            console.dir(e);
             
             // add or remove done class
             div.classList.toggle('done'); // if class not exists then add // if class exists then remove it.
 
             let temp = div.classList.length - 1;
             let id = 0;
+            let isDone = false;
             
             // make button inner text to unmark
             if(div.classList.contains('done')) {
+                isDone = true;
+
                 doneTodo = doneTodo + 1; // increment done todo
                 unDoneTodo = unDoneTodo - 1; // decrement undone todo
 
@@ -193,20 +219,31 @@
                 e.innerText = "Mark as done";
                 div.querySelector('.todo-name').style.textDecoration = "none";
             }
-            
-            console.log(div);
-            // convert div to string
-            console.log(div.outerHTML);
 
             // update code in localStorage
-            localStorage.setItem(id, div.outerHTML);
+            let data = localStorage.getItem("todos");
+            let arr = JSON.parse(data); // get array
+            // update at id index.
+            arr.some((element) => {
+                if(element.id == id) {
+                    element.markup = div.outerHTML;
+                    element.isDone = isDone;
+                    console.log("update in local storage also");
+                    return true;
+                }
+            });
+            // convert back array into string
+            data = JSON.stringify(arr);
+            // add data in local storage
+            localStorage.setItem("todos", data);
+
             updateStatus();
         }
 
         // Delete todo from list.
         const deleteTodo = (e) => {
             totalTodo = totalTodo - 1; // decrement total todo
-            let temp = e.parentElement.parentElement.classList.length - 1;
+            let temp = e.parentElement.parentElement.classList.length - 1; // for find id of div.
             let id = 0;
 
             // check todo is done or not
@@ -218,18 +255,23 @@
                 id = e.parentElement.parentElement.classList[temp];
             }
 
-            // const div = e.parentNode.parentNode; // this can be return text Node, html element.
             const div = e.parentElement.parentElement; // we need html element.
 
             console.log(id);
             console.log("DELETE: id: ",id);
 
-            localStorage.removeItem(id); // remove todo from localStorage
+            // ---> Remove from object also.
+            let data = localStorage.getItem("todos");
+            let arr = JSON.parse(data); // get array
+            // find the in which position object is store.
+            let deleteIndex = arr.findIndex(element => {
+                return element.id == id;
+            });
+            arr.splice(deleteIndex,1); // delete element from array.
+            data = JSON.stringify(arr); // convert back to string
+            localStorage.setItem("todos",data);
 
             div.remove(); // remove todo from list (not display)
-
-            // reset id of all todo & update localStorage
-            reSetIdForAllTodo();
 
             if(list.children.length == 0) {
                 // show no todo message
@@ -239,37 +281,6 @@
             updateStatus();
         }
 
-        // reset id of class for all div. (when todo is deleted)
-        function reSetIdForAllTodo() {
-            console.log("------- reSetIdForAllTodo() -------");
-            let nodes = list.children;
-            let traverse = 0;
-
-            for (const iterable of nodes) {
-                console.log("traverse: ",traverse);
-                let isDone = iterable.classList.contains('done');
-
-                let temp = 0;
-                if(isDone) {
-                    temp = iterable.classList.length - 2; // find the length of classList array. (we need second last index of classList array)
-                } else {
-                    temp = iterable.classList.length - 1; // find the length of classList array. (we need last index of classList array)
-                }
-                let id = iterable.classList[temp]; // get id of todo
-
-                localStorage.removeItem(id); // remove todo from localStorage
-
-                let oldClass = iterable.classList[temp]; // get old id
-                iterable.classList.replace(oldClass, traverse); // replace old id with new id
-                // iterable.classList[temp] = traverse; // update id in classList array
-                console.log("value of class: ",iterable.classList[temp]);
-
-                let markup = iterable.outerHTML; // get todo in string format
-
-                localStorage.setItem(traverse, markup); // add todo in localStorage with new id
-                traverse++;
-            }
-        }
 
     </script>
 </body>
