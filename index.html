@@ -138,7 +138,7 @@
 
             obj = {
                 todoName: `${todo}`,
-                markup: markup,
+                // markup: markup,
                 isDone: false,
                 id: idOfdiv,
             }
@@ -164,14 +164,21 @@
         // Add todo from localStorage.
         const addTodoFromLocalStorage = (obj) => {
             totalTodo = totalTodo + 1; // increment total todo
-
-            const markup = obj.markup;
-            if(obj.isDone) {
+            const isDone = obj.isDone;
+            if(isDone) {
                 doneTodo = doneTodo + 1;
             } else {
                 unDoneTodo = unDoneTodo + 1;
             }
-            console.log(markup);
+            const markup = `
+                <div class="item ${obj.id} ${isDone ? 'done' : ''}"> 
+                    <h3 class="todo-name" ${isDone ? 'style="text-decoration: underline;"': ''}>${obj.todoName}</h3>
+                    <div class="btns">
+                        <button class="mark-done btn" onclick="mark(this)" >${isDone ? 'Unmark' : 'Mark as done'}</button>
+                        <button class="delete btn delete" onclick="deleteTodo(this)">Delete</button>
+                    </div>
+                </div>
+            `;
 
             console.log("list.children.length: ",list.children.length)
             
@@ -226,7 +233,7 @@
             // update at id index.
             arr.some((element) => {
                 if(element.id == id) {
-                    element.markup = div.outerHTML;
+                    // element.markup = div.outerHTML;
                     element.isDone = isDone;
                     console.log("update in local storage also");
                     return true;
